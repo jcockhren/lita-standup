@@ -19,7 +19,7 @@ module Lita
       config :email_subject_line, type: String, default: "Standup summary for --today--", required: true  #interpolated at runtime
 
       route %r{^start standup now}i, :begin_standup, command: true, restrict_to: :standup_admins
-      route %r{standup response (#{config[:standup_questions].first}.*)(#{config[:standup_questions][1]}.*)(#{config[:standup_questions][2]}.*)}i, :process_standup, command: true
+      route /standup response (#{config[:standup_questions].first}.*)(#{config[:standup_questions][1]}.*)(#{config[:standup_questions][2]}.*)/i, :process_standup, command: true
 
       def begin_standup(request)
         redis.set('last_standup_started_at', Time.now)
