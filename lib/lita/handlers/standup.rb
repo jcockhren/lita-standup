@@ -5,6 +5,7 @@ module Lita
       config :time_to_respond, types: [Integer, Float], default: 60 #minutes
       config :summary_email_recipients, type: Array, default: ['you@company.com'], required: true
       config :name_of_auth_group, type: Symbol, default: :standup_participants, required: true
+      config :standup_questions, type: Array, required: false, default: ['1', '2', '3']
 
       ## SMTP Mailer Settings ##
       config :address, type: String, required: true
@@ -18,7 +19,7 @@ module Lita
       config :email_subject_line, type: String, default: "Standup summary for --today--", required: true  #interpolated at runtime
 
       route %r{^start standup now}i, :begin_standup, command: true, restrict_to: :standup_admins
-      route %r{standup response (1.*)(2.*)(3.*)}i, :process_standup, command: true
+      route %r{standup response (#{config[:standup_questions].first}.*)(#{config[:standup_questions][1]}.*)(#{config[:standup_questions][2]}.*)}i, :process_standup, command: true
 
       def begin_standup(request)
         redis.set('last_standup_started_at', Time.now)
@@ -42,8 +43,8 @@ module Lita
           source = Lita::Source.new(user: user)
           robot.send_message(source, "Time for standup!")
           robot.send_message(source, "Please tell me what you did yesterday,
-                                    what you're doing now, and what you're
-                                    working on today. Please prepend your
+                                    what you're doing now, and what obsticles
+                                    are impeading your progress. Please prepend your
                                     answer with 'standup response'")
         end
       end
