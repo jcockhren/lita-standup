@@ -44,7 +44,7 @@ module Lita
         request.reply('Response recorded. Thanks for partipating')
         date_string = Time.now.strftime('%Y%m%d')
         user_name = request.user.name.split(' ').join('_') #lol
-        redis.set(date_string + '-' + user_name, result.matches.first))
+        redis.set(date_string + '-' + user_name, result.matches.first)
       end
 
       private
