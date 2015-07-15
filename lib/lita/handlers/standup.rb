@@ -38,7 +38,10 @@ module Lita
       end
 
       def process_standup(request)
-        return unless timing_is_right?
+        unless timing_is_right?
+          request.reply("Whoops... Looks like you missed standup.")
+          return
+        end
         result = /(#{config.questions.first}.*)(?:\s|\n)(#{config.questions[1]}.*)(?:\s|\n)(#{config.questions[2]}.*)/.request.matches.first
         result = request.matches.first if result.nil?
         request.reply('Response recorded. Thanks for partipating')
