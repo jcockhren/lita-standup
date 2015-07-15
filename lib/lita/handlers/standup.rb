@@ -27,7 +27,7 @@ module Lita
       end
 
 
-      route %r{^start standup now}i, :begin_standup, command: true, restrict_to: :standup_admins
+      route %r{^start standup(?:\snow)}i, :begin_standup, command: true, restrict_to: :standup_admins
       route /standup response (.*)/i, :process_standup, command: false
 
       def begin_standup(request)
