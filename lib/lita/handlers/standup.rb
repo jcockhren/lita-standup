@@ -21,7 +21,6 @@ module Lita
       on :loaded, :setup
 
       def setup(payload)
-        puts config.questions
         config.questions.each_with_index do |q, i|
           redis.set("question-#{i}", q)
         end
@@ -40,11 +39,12 @@ module Lita
 
       def process_standup(request)
         return unless timing_is_right?
-        puts request.matches.first
+        result = /(#{config.questions.first}.*) (#{config.questions[1]}.*) (#{config.questions[2]}.*)/.request.matches.first
+        return unless result
         request.reply('Response recorded. Thanks for partipating')
         date_string = Time.now.strftime('%Y%m%d')
         user_name = request.user.name.split(' ').join('_') #lol
-        redis.set(date_string + '-' + user_name, request.matches.first)
+        redis.set(date_string + '-' + user_name, result.matches.first))
       end
 
       private
