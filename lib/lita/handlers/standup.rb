@@ -46,7 +46,7 @@ module Lita
           result = request.matches.first
         else
           request.reply_privately('Response recorded. Thanks for participating')
-          result = match.to_a
+          result = match.to_a[1..-1]
         end
         date_string = Time.now.strftime('%Y%m%d')
         user_name = request.user.name.split(' ').join('_') #lol
