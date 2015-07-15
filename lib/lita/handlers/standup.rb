@@ -42,7 +42,7 @@ module Lita
           request.reply("Whoops... Looks like you missed standup.")
           return
         end
-        match = /(#{config.questions.first}.*)(?:\s|\n)(#{config.questions[1]}.*)(?:\s|\n)(#{config.questions[2]}.*)/.request.matches.first
+        match = /(#{config.questions.first}.*)(?:\s|\n)(#{config.questions[1]}.*)(?:\s|\n)(#{config.questions[2]}.*)/.match(request.matches.first)
         if match.nil?
           request.reply("Response recorded BUT, I wasn't able to determine if you answered the required questions.")
           result = request.matches.first
