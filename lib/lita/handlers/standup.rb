@@ -39,8 +39,8 @@ module Lita
 
       def process_standup(request)
         return unless timing_is_right?
-        result = /(#{config.questions.first}.*) (#{config.questions[1]}.*) (#{config.questions[2]}.*)/.request.matches.first
-        return unless result
+        result = /(#{config.questions.first}.*)(?:\s|\n)(#{config.questions[1]}.*)(?:\s|\n)(#{config.questions[2]}.*)/.request.matches.first
+        result = request.matches.first if result.nil?
         request.reply('Response recorded. Thanks for partipating')
         date_string = Time.now.strftime('%Y%m%d')
         user_name = request.user.name.split(' ').join('_') #lol
