@@ -49,7 +49,7 @@ module Lita
       private
 
       def message_all_users(request)
-        request.replay("@group Time for standup!")
+        request.reply("@group Time for standup!")
 =begin
         @users.each do |user|
           source = Lita::Source.new(user: user)
