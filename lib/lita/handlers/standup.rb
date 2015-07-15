@@ -28,7 +28,7 @@ module Lita
 
 
       route %r{^start standup(?:\snow)}i, :begin_standup, command: true, restrict_to: :standup_admins
-      route /standup response (.*)/i, :process_standup, command: false
+      route /standup response (.*)/i, :process_standup, command: true
 
       def begin_standup(request)
         redis.set('last_standup_started_at', Time.now)
