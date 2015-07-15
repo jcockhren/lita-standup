@@ -5,7 +5,7 @@ module Lita
       config :time_to_respond, types: [Integer, Float], default: 60 #minutes
       config :summary_email_recipients, type: Array, default: ['you@company.com'], required: true
       config :name_of_auth_group, type: Symbol, default: :standup_participants, required: true
-      config :standup_questions, type: Array, required: false, default: ['1', '2', '3']
+      config :questions, type: Array, required: false, default: ['1', '2', '3']
 
       ## SMTP Mailer Settings ##
       config :address, type: String, required: true
@@ -18,8 +18,18 @@ module Lita
       config :robot_email_address, type: String, default: 'noreply@lita.com', required: true
       config :email_subject_line, type: String, default: "Standup summary for --today--", required: true  #interpolated at runtime
 
+      on :loaded, :setup
+
+      def setup(payload)
+        puts config.questions
+        config.questions.each_with_index do |q, i|
+          redis.set("question-#{i}", q)
+        end
+      end
+
+
       route %r{^start standup now}i, :begin_standup, command: true, restrict_to: :standup_admins
-      route /standup response (#{config.standup_questions.first}.*)(#{config.standup_questions[1]}.*)(#{config.standup_questions[2]}.*)/i, :process_standup, command: true
+      route /standup response (.*)/i, :process_standup, command: false
 
       def begin_standup(request)
         redis.set('last_standup_started_at', Time.now)
@@ -30,6 +40,7 @@ module Lita
 
       def process_standup(request)
         return unless timing_is_right?
+        puts request.matches.first
         request.reply('Response recorded. Thanks for partipating')
         date_string = Time.now.strftime('%Y%m%d')
         user_name = request.user.name.split(' ').join('_') #lol
