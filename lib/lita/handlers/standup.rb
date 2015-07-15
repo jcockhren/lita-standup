@@ -18,17 +18,8 @@ module Lita
       config :robot_email_address, type: String, default: 'noreply@lita.com', required: true
       config :email_subject_line, type: String, default: "Standup summary for --today--", required: true  #interpolated at runtime
 
-      on :loaded, :setup
-
-      def setup(payload)
-        config.questions.each_with_index do |q, i|
-          redis.set("question-#{i}", q)
-        end
-      end
-
-
-      route %r{^start standup(?:\snow)}i, :begin_standup, command: true, restrict_to: :standup_admins
-      route /standup response (.*)/i, :process_standup, command: true
+      route %r{^start standup(?:\snow)?}i, :begin_standup, command: true, restrict_to: :standup_admins
+      route /standup response (.*)/i, :process_standup, command: false
 
       def begin_standup(request)
         redis.set('last_standup_started_at', Time.now)
@@ -42,13 +33,13 @@ module Lita
           request.reply("Whoops... Looks like you missed standup.")
           return
         end
-        match = /(#{config.questions.first}.*)(?:\s|\n)(#{config.questions[1]}.*)(?:\s|\n)(#{config.questions[2]}.*)/.match(request.matches.first)
+        match = /(#{config.questions.first}.*)(?:\s|\n)(#{config.questions[1]}.*)(?:\s|\n)(#{config.questions[2]}.*)/.match(request.matches.first.first)
         if match.nil?
           request.reply("Response recorded BUT, I wasn't able to determine if you answered the required questions.")
           result = request.matches.first
         else
-          request.reply('Response recorded. Thanks for partipating')
-          result = match.matches.first
+          request.reply('Response recorded. Thanks for participating')
+          result = match[0]
         end
         date_string = Time.now.strftime('%Y%m%d')
         user_name = request.user.name.split(' ').join('_') #lol
