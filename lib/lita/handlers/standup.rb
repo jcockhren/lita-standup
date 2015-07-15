@@ -24,7 +24,7 @@ module Lita
       def begin_standup(request)
         redis.set('last_standup_started_at', Time.now)
         find_and_create_users
-        message_all_users
+        message_all_users(request)
         SummaryEmailJob.new().async.later(config.time_to_respond * 60, {redis: redis, config: config})
       end
 
@@ -35,10 +35,10 @@ module Lita
         end
         match = /(#{config.questions.first}.*)(?:\s|\n)(#{config.questions[1]}.*)(?:\s|\n)(#{config.questions[2]}.*)/.match(request.matches.first.first)
         if match.nil?
-          request.reply("Response recorded BUT, I wasn't able to determine if you answered the required questions.")
+          request.reply_privately("Response recorded BUT, I wasn't able to determine if you answered the required questions.")
           result = request.matches.first
         else
-          request.reply('Response recorded. Thanks for participating')
+          request.reply_privately('Response recorded. Thanks for participating')
           result = match[0]
         end
         date_string = Time.now.strftime('%Y%m%d')
@@ -48,7 +48,9 @@ module Lita
 
       private
 
-      def message_all_users
+      def message_all_users(request)
+        request.replay("@group Time for standup!")
+=begin
         @users.each do |user|
           source = Lita::Source.new(user: user)
           robot.send_message(source, "Time for standup!")
@@ -57,6 +59,7 @@ module Lita
                                     are impeading your progress. Please prepend your
                                     answer with 'standup response'")
         end
+=end
       end
 
       def find_and_create_users
