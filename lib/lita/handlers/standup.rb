@@ -19,6 +19,7 @@ module Lita
       config :email_subject_line, type: String, default: "Standup summary for --today--", required: true  #interpolated at runtime
 
       route %r{^start standup(?:\snow)?}i, :begin_standup, command: true, restrict_to: :standup_admins
+      route %r{^stop standup}i, :stop_standup, command: true, restrict_to: :standup_admins
       route /standup response (.*)/i, :process_standup, command: false
 
       def begin_standup(request)
@@ -26,6 +27,12 @@ module Lita
         find_and_create_users
         message_all_users(request)
         SummaryEmailJob.new().async.later(config.time_to_respond * 60, {redis: redis, config: config})
+      end
+
+      def stop_standup(request)
+        redis.set('last_standup_started_at', -1)
+        #find_and_create_users
+        #message_all_users(request)
       end
 
       def process_standup(request)
@@ -39,7 +46,7 @@ module Lita
           result = request.matches.first
         else
           request.reply_privately('Response recorded. Thanks for participating')
-          result = match[0]
+          result = match[0].to_s
         end
         date_string = Time.now.strftime('%Y%m%d')
         user_name = request.user.name.split(' ').join('_') #lol
