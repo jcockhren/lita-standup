@@ -42,12 +42,17 @@ module Lita
           request.reply("Whoops... Looks like you missed standup.")
           return
         end
-        result = /(#{config.questions.first}.*)(?:\s|\n)(#{config.questions[1]}.*)(?:\s|\n)(#{config.questions[2]}.*)/.request.matches.first
-        result = request.matches.first if result.nil?
+        match = /(#{config.questions.first}.*)(?:\s|\n)(#{config.questions[1]}.*)(?:\s|\n)(#{config.questions[2]}.*)/.request.matches.first
+        if match.nil?
+          request.reply("I wasn't able to determine if you answered the required questions. Sending your response along anyway.")
+          result = request.matches.first
+        else
+          result = match.matches.first
+        end
         request.reply('Response recorded. Thanks for partipating')
         date_string = Time.now.strftime('%Y%m%d')
         user_name = request.user.name.split(' ').join('_') #lol
-        redis.set(date_string + '-' + user_name, result.matches.first)
+        redis.set(date_string + '-' + user_name, result)
       end
 
       private
